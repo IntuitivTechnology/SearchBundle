@@ -1,0 +1,12 @@
+services:
+  search.database.indexer:
+    class: IT\SearchBundle\Services\DatabaseIndexer
+    arguments:
+      - "@doctrine.orm.entity_manager"
+      - "%search.index.configuration%"
+
+  search.database.searcher:
+    class: IT\SearchBundle\Services\DatabaseSearcher
+    arguments:
+      - "@doctrine.orm.entity_manager"
+      - "@knp_paginator"
