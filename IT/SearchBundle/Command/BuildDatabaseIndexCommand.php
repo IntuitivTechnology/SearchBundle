@@ -24,7 +24,7 @@ class BuildDatabaseIndexCommand extends BaseCommand
 
     public function executeCommand(InputInterface $input, OutputInterface $output)
     {
-        $indexes = $this->getContainer()->get('search.database.indexer')->indexContent();
+        $indexes = $this->getContainer()->get('it_search.database.indexer')->indexContent();
         $this->printMessage('comment', sprintf('%d items indexed', count($indexes)));
     }
 

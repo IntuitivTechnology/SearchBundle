@@ -45,7 +45,7 @@ class SearchIndex
      * Set the value of id.
      *
      * @param integer $id
-     * @return \CoreBundle\Entity\Block
+     * @return \IT\SearchBundle\Entity\SearchIndex
      */
     public function setId($id)
     {

@@ -109,8 +109,6 @@ class DatabaseIndexer
      */
     public function updateIndex($object)
     {
-        $searchIndexes = array();
-
         /** @var array $index */
         foreach ($this->indexConfig as $index) {
             $classname = $index['classname'];

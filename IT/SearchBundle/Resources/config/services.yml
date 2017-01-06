@@ -1,11 +1,11 @@
 services:
-  search.database.indexer:
+  it_search.database.indexer:
     class: IT\SearchBundle\Services\DatabaseIndexer
     arguments:
       - "@doctrine.orm.entity_manager"
       - "%search.index.configuration%"
 
-  search.database.searcher:
+  it_search.database.searcher:
     class: IT\SearchBundle\Services\DatabaseSearcher
     arguments:
       - "@doctrine.orm.entity_manager"

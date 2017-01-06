@@ -9,6 +9,12 @@
       "email": "pvassoilles@intuitiv.fr",
       "homepage": "https://github.com/pierre-vassoilles",
       "role": "Developer"
+    },
+    {
+      "name": "Frédéric KIM",
+      "email": "fkim@intuitiv.fr",
+      "homepage": "https://github.com/hitsu10th",
+      "role": "Developer"
     }
   ],
   "require": {
