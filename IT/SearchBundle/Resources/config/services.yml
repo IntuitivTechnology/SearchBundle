@@ -3,6 +3,7 @@ services:
     class: IT\SearchBundle\Services\DatabaseIndexer
     arguments:
       - "@doctrine.orm.entity_manager"
+      - "@event_dispatcher"
       - "%search.index.configuration%"
 
   it_search.database.searcher:

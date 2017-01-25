@@ -11,6 +11,11 @@ namespace IT\SearchBundle\Services;
 
 use Doctrine\ORM\EntityManager;
 use IT\SearchBundle\Entity\SearchIndex;
+use IT\SearchBundle\Event\ITSearchEvents;
+use IT\SearchBundle\Event\SearchPostIndexEvent;
+use IT\SearchBundle\Event\SearchPreIndexEvent;
+use IT\SearchBundle\Event\SearchPreIndexObjectEvent;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class DatabaseIndexer
 {
@@ -18,12 +23,16 @@ class DatabaseIndexer
     /** @var EntityManager $em */
     protected $em;
 
+    /** @var EventDispatcher $dispatcher */
+    protected $dispatcher;
+
     /** @var array $indexConfig */
     protected $indexConfig;
 
-    public function __construct(EntityManager $em, array $indexConfig)
+    public function __construct(EntityManager $em, EventDispatcher $dispatcher, array $indexConfig)
     {
         $this->em = $em;
+        $this->dispatcher = $dispatcher;
         $this->indexConfig = $indexConfig;
     }
 
@@ -41,6 +50,10 @@ class DatabaseIndexer
 
         $searchIndexes = array();
 
+        // Dispatch the PRE-INDEX event before indexing objects
+        $evtPreIndex = new SearchPreIndexEvent($this->em);
+        $this->dispatcher->dispatch(ITSearchEvents::PRE_INDEX, $evtPreIndex);
+
         /** @var array $index */
         foreach ($this->indexConfig as $index) {
             $classname = $index['classname'];
@@ -56,6 +69,11 @@ class DatabaseIndexer
                 $objects = $repository->findBy($filters);
 
                 foreach ($objects as $object) {
+
+                    // Distach the pre-index object event
+                    $evtPreIndexObject = new SearchPreIndexObjectEvent($object, $this->em);
+                    $this->dispatcher->dispatch(ITSearchEvents::PRE_INDEX_OBJECT, $evtPreIndexObject);
+
                     $content = '';
 
                     // Build index content
@@ -98,6 +116,10 @@ class DatabaseIndexer
 
         $this->em->flush();
 
+        // Dispatch the POST-INDEX event after indexing objects
+        $evtPostIndex = new SearchPostIndexEvent($this->em, $searchIndexes);
+        $this->dispatcher->dispatch(ITSearchEvents::POST_INDEX, $evtPostIndex);
+
         return $searchIndexes;
     }
 
@@ -109,6 +131,12 @@ class DatabaseIndexer
      */
     public function updateIndex($object)
     {
+
+        // Distach the pre-index object event
+        $evtPreIndexObject = new SearchPreIndexObjectEvent($object, $this->em);
+        $this->dispatcher->dispatch(ITSearchEvents::PRE_INDEX_OBJECT, $evtPreIndexObject);
+
+
         /** @var array $index */
         foreach ($this->indexConfig as $index) {
             $classname = $index['classname'];
