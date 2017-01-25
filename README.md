@@ -1,6 +1,6 @@
 # SearchBundle
 
-Symfony2 Bundle for logging all emails sent with SwiftMailer.
+Symfony2 Bundle : fulltext index and search for multiple Doctrine entities
 
 ## Installation
 
