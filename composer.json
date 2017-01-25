@@ -25,7 +25,7 @@
     "knplabs/knp-paginator-bundle": "2.5.*"
   },
   "autoload": {
-    "psr-4": { "IT\\SearchBundle\\": "" }
+    "psr-4": { "IT\\SearchBundle\\": "IT/SearchBundle" }
   },
   "target-dir": ""
 }
