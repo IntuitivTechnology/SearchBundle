@@ -88,3 +88,82 @@ $this->get('it_search.database.indexer')->updateIndex($object);
 ```
 
 There is no method for removing a specific index from the database for now. The feature will be implemented soon.
+
+
+## Events
+
+Three event are dispatched during objects indexation :
+- ITSearchEvents::PRE_INDEX
+Dispatched at the beginning of the indexing.
+
+- ITSearchEvents::PRE_INDEX_OBJECT
+Dispatched before indexing a specific object. The object is available in the event object.
+
+- ITSearchEvents::POST_INDEX
+Dispatched after indexing all objects. The SearchIndex objects list is available in the event object.
+
+
+### Example of use
+
+Here is an example of an All-in-one event subscriber :
+
+```php
+// ACMEBundle\EventSubscriber\SearchEventSubscriber.php
+
+use IT\SearchBundle\Event\ITSearchEvents;
+use IT\SearchBundle\Event\SearchPostIndexEvent;
+use IT\SearchBundle\Event\SearchPreIndexEvent;
+use IT\SearchBundle\Event\SearchPreIndexObjectEvent;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+class SearchEventSubscriber implements EventSubscriberInterface
+{
+
+    public static function getSubscribedEvents()
+    {
+
+        return array(
+            ITSearchEvents::PRE_INDEX           => 'preIndex',
+            ITSearchEvents::PRE_INDEX_OBJECT    => 'preIndexObject',
+            ITSearchEvents::POST_INDEX          => 'postIndex',
+        );
+    }
+
+    public function preIndex(SearchPreIndexEvent $evt)
+    {
+        // Do stuff here
+    }
+
+    public function preIndexObject(SearchPreIndexObjectEvent $evt)
+    {
+        // Do stuff here
+    }
+
+    public function postIndex(SearchPostIndexEvent $evt)
+    {
+        // Do stuff here
+    }
+
+}
+```
+
+```xml
+    <!--services.yml-->
+    <services>
+        <!--...-->
+        <service id="acme.search.subscriber" class="ACMEBundle\EventSubscriber\SearchEventSubscriber">
+            <tag name="kernel.event_subscriber"></tag>
+        </service>
+        <!--...-->
+    </services>
+```
+OR, in Yaml :
+```yml
+#services.yml
+
+services:
+  acme.search.subscriber:
+    class: "ACMEBundle\EventSubscriber\SearchEventSubscriber"
+    tags:
+      - { name:"kernel.event_subscriber" }
+```

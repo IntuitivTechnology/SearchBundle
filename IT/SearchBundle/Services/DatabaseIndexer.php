@@ -15,7 +15,7 @@ use IT\SearchBundle\Event\ITSearchEvents;
 use IT\SearchBundle\Event\SearchPostIndexEvent;
 use IT\SearchBundle\Event\SearchPreIndexEvent;
 use IT\SearchBundle\Event\SearchPreIndexObjectEvent;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class DatabaseIndexer
 {
@@ -23,13 +23,13 @@ class DatabaseIndexer
     /** @var EntityManager $em */
     protected $em;
 
-    /** @var EventDispatcher $dispatcher */
+    /** @var EventDispatcherInterface $dispatcher */
     protected $dispatcher;
 
     /** @var array $indexConfig */
     protected $indexConfig;
 
-    public function __construct(EntityManager $em, EventDispatcher $dispatcher, array $indexConfig)
+    public function __construct(EntityManager $em, EventDispatcherInterface $dispatcher, array $indexConfig)
     {
         $this->em = $em;
         $this->dispatcher = $dispatcher;
