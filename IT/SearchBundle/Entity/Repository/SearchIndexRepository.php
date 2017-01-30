@@ -2,6 +2,8 @@
 
 namespace IT\SearchBundle\Entity\Repository;
 
+use Doctrine\ORM\QueryBuilder;
+
 /**
  * SearchIndexRepository
  *
@@ -11,7 +13,15 @@ namespace IT\SearchBundle\Entity\Repository;
 class SearchIndexRepository extends \Doctrine\ORM\EntityRepository
 {
 
-    public function searchQB($terms)
+    /**
+     * Returns a QueryBuilder corresponding to the first basic search with the option "IN NATURAL LANGUAGE MODE".
+     *
+     * @param       $terms
+     * @param array $entityClassnames
+     *
+     * @return QueryBuilder
+     */
+    public function searchQB($terms, array $entityClassnames = array())
     {
 
         $terms = strip_tags(strtolower($terms));
@@ -20,14 +30,22 @@ class SearchIndexRepository extends \Doctrine\ORM\EntityRepository
             ->select('si, MATCH_AGAINST(si.content, :textFilter \'IN NATURAL LANGUAGE MODE\') as score')
             ->where("MATCH_AGAINST(si.content, :textFilter 'IN NATURAL LANGUAGE MODE') >= 0.8")
             ->setParameter('textFilter', $terms)
+            ->addOrderBy('score', 'DESC');
 
-            ->addOrderBy('score', 'DESC')
-        ;
+        $this->addEntityClassnamesFilter($qb, $entityClassnames);
 
         return $qb;
     }
 
-    public function searchExpandedQB($terms)
+    /**
+     * Returns a QueryBuilder corresponding to the extended search with the option "IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION".
+     *
+     * @param       $terms
+     * @param array $entityClassnames
+     *
+     * @return QueryBuilder
+     */
+    public function searchExpandedQB($terms, array $entityClassnames = array())
     {
 
         $terms = strip_tags(strtolower($terms));
@@ -36,12 +54,26 @@ class SearchIndexRepository extends \Doctrine\ORM\EntityRepository
             ->select('si, MATCH_AGAINST(si.content, :textFilter \'IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION\') as score')
             ->where("MATCH_AGAINST(si.content, :textFilter 'IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION') >= 0.8")
             ->setParameter('textFilter', $terms)
+            ->addOrderBy('score', 'DESC');
 
-            ->addOrderBy('score', 'DESC')
-        ;
+        $this->addEntityClassnamesFilter($qb, $entityClassnames);
 
         return $qb;
     }
 
+    /**
+     * Adds a WHERE on the classname to filter the results with a set of classnames
+     *
+     * @param QueryBuilder $qb
+     * @param array        $entityClassnames
+     */
+    protected function addEntityClassnamesFilter(QueryBuilder $qb, array $entityClassnames = array())
+    {
+        if (is_array($entityClassnames) && count($entityClassnames) > 0) {
+            $qb
+                ->andWhere('si.classname IN (:classnames)')
+                ->setParameter('classnames', $entityClassnames);
+        }
+    }
 
 }

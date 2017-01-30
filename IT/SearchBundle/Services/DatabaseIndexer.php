@@ -105,8 +105,7 @@ class DatabaseIndexer
                     $searchIndex
                         ->setContent(strip_tags(strtolower($content)))
                         ->setClassname($classname)
-                        ->setIdentifier($identifier)
-                    ;
+                        ->setIdentifier($identifier);
                     $this->em->persist($searchIndex);
 
                     $searchIndexes[] = $searchIndex;
@@ -127,6 +126,7 @@ class DatabaseIndexer
      * Update one object index
      *
      * @param $object
+     *
      * @throws \Exception
      */
     public function updateIndex($object)
@@ -166,7 +166,7 @@ class DatabaseIndexer
 
                         $content .= $object->$getter();
                     } else {
-                        throw new \Exception(sprintf('The entity %s must provide a method names %s to be properly indexed', $classname, $getter));
+                        throw new \Exception(sprintf('The entity %s must provide a method named %s to be properly indexed', $classname, $getter));
                     }
                 }
 
@@ -176,7 +176,7 @@ class DatabaseIndexer
                 if (method_exists($object, $identifierGetter)) {
                     $identifier = $object->$identifierGetter();
                 } else {
-                    throw new \Exception(sprintf('The entity %s must provide a method names %s to be properly indexed', $classname, $identifierGetter));
+                    throw new \Exception(sprintf('The entity %s must provide a method named %s to be properly indexed', $classname, $identifierGetter));
                 }
 
                 $searchIndex = $this->em->getRepository('ITSearchBundle:SearchIndex')->findOneBy(array(
@@ -189,13 +189,11 @@ class DatabaseIndexer
 
                     $searchIndex
                         ->setClassname($classname)
-                        ->setIdentifier($identifier)
-                    ;
+                        ->setIdentifier($identifier);
                 }
 
                 $searchIndex
-                    ->setContent(strip_tags(strtolower($content)))
-                ;
+                    ->setContent(strip_tags(strtolower($content)));
 
                 $this->em->persist($searchIndex);
 
@@ -203,6 +201,55 @@ class DatabaseIndexer
         }
 
         $this->em->flush();
+    }
+
+    /**
+     * Removes an entity from the index, if exists.
+     *
+     * @param $object
+     *
+     * @return $this
+     * @throws \Exception
+     */
+    public function removeIndex($object)
+    {
+
+        $objectClassname = get_class($object);
+
+        /** @var array $index */
+        foreach ($this->indexConfig as $index) {
+            $classname = $index['classname'];
+
+            if ($classname != $objectClassname) {
+                continue;
+            }
+
+            $identifierField = $index['identifier'];
+            $identifierGetter = 'get' . ucfirst($identifierField);
+
+            if (method_exists($object, $identifierGetter)) {
+                $identifierValue = $object->$identifierGetter();
+
+                $index = $this->em->getRepository('ITSearchBundle:SearchIndex')->findBy(array(
+                    'identifier' => $identifierValue,
+                    'classname' => $classname,
+                ));
+
+                if (count($index) > 0) {
+                    $index = $index[0];
+                }
+
+                if ($index instanceof SearchIndex) {
+                    $this->em->remove($index);
+                    $this->em->flush();
+                }
+            } else {
+                throw new \Exception(sprintf('The entity %s must provide a method named %s to be properly indexed', $classname, $identifierGetter));
+            }
+
+        }
+
+        return $this;
     }
 
     /**
@@ -221,7 +268,7 @@ class DatabaseIndexer
 
         try {
             $connection->query('SET FOREIGN_KEY_CHECKS=0');
-            $connection->query('DELETE FROM '.$tableName);
+            $connection->query('DELETE FROM ' . $tableName);
             // Beware of ALTER TABLE here--it's another DDL statement and will cause
             // an implicit commit.
             $connection->query('SET FOREIGN_KEY_CHECKS=1');

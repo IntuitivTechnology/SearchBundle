@@ -12,6 +12,13 @@ namespace IT\SearchBundle\Event;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\EventDispatcher\Event;
 
+/**
+ * Class SearchPostIndexEvent
+ *
+ * Event fired after the complete index refresh
+ *
+ * @package IT\SearchBundle\Event
+ */
 class SearchPostIndexEvent extends Event
 {
 

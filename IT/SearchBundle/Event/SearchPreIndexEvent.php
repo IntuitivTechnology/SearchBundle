@@ -12,6 +12,13 @@ namespace IT\SearchBundle\Event;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\EventDispatcher\Event;
 
+/**
+ * Class SearchPreIndexEvent
+ *
+ * Event fired before the complete index refresh
+ *
+ * @package IT\SearchBundle\Event
+ */
 class SearchPreIndexEvent extends Event
 {
 

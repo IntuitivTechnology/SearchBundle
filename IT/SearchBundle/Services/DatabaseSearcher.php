@@ -23,24 +23,42 @@ class DatabaseSearcher implements SearcherInterface
     /** @var PaginatorInterface $paginator */
     protected $paginator;
 
+    /**
+     * DatabaseSearcher constructor.
+     *
+     * @param EntityManager      $em
+     * @param PaginatorInterface $paginator
+     */
     public function __construct(EntityManager $em, PaginatorInterface $paginator)
     {
         $this->em = $em;
         $this->paginator = $paginator;
     }
 
-    public function search($terms, $page = 1, $limit = 10)
+    /**
+     * Search entities in the indexed items using "MATCH AGAINST" MySQL function.<br>
+     * First searches "IN NATURAL LANGUAGE MODE" into the database.<br>
+     * If no result was found, try to search "IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION".<br>
+     *
+     * @param string $terms            Terms to search
+     * @param int    $page             For pagination, put the page you need, default to 1
+     * @param int    $limit            For the pagination, put the limit of the request, default to 10
+     * @param array  $entityClassnames An array of full classnames. If the array is empty, the services searches on all entities
+     *
+     * @return SlidingPagination
+     */
+    public function search($terms, $page = 1, $limit = 10, array $entityClassnames = array())
     {
         /** @var SlidingPagination $indexes */
         $indexes = $this->paginator->paginate(
-            $this->em->getRepository('ITSearchBundle:SearchIndex')->searchQB($terms),
+            $this->em->getRepository('ITSearchBundle:SearchIndex')->searchQB($terms, $entityClassnames),
             $page,
             $limit
         );
 
         if ($indexes->getTotalItemCount() <= 0) {
             $indexes = $this->paginator->paginate(
-                $this->em->getRepository('ITSearchBundle:SearchIndex')->searchExpandedQB($terms),
+                $this->em->getRepository('ITSearchBundle:SearchIndex')->searchExpandedQB($terms, $entityClassnames),
                 $page,
                 $limit
             );

@@ -52,8 +52,9 @@ abstract class BaseCommand extends ContainerAwareCommand
     /**
      * Execution of commands extending this class
      *
-     * @param InputInterface $input
+     * @param InputInterface  $input
      * @param OutputInterface $output
+     *
      * @return mixed
      */
     abstract public function executeCommand(InputInterface $input, OutputInterface $output);
@@ -78,8 +79,7 @@ abstract class BaseCommand extends ContainerAwareCommand
                 'f',
                 InputOption::VALUE_NONE,
                 'Fake mode'
-            )
-        ;
+            );
 
         $this->configureCommand();
     }
@@ -87,7 +87,7 @@ abstract class BaseCommand extends ContainerAwareCommand
     /**
      * Base command execution.
      *
-     * @param InputInterface $input
+     * @param InputInterface  $input
      * @param OutputInterface $output
      *
      * @throws \Exception

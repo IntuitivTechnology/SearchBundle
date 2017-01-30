@@ -18,8 +18,7 @@ class BuildDatabaseIndexCommand extends BaseCommand
     {
         $this
             ->setName('search:index:build')
-            ->setDescription('Builds the database search index')
-        ;
+            ->setDescription('Builds the database search index');
     }
 
     public function executeCommand(InputInterface $input, OutputInterface $output)

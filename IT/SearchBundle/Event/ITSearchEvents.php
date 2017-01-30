@@ -8,7 +8,13 @@
 
 namespace IT\SearchBundle\Event;
 
-
+/**
+ * Class ITSearchEvents
+ *
+ * Provides Search Events names
+ *
+ * @package IT\SearchBundle\Event
+ */
 class ITSearchEvents
 {
 

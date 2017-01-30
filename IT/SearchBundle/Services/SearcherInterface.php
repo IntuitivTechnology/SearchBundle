@@ -14,8 +14,9 @@ interface SearcherInterface
 
     /**
      * Method user to search into site content
-     * 
+     *
      * @param $terms
+     *
      * @return mixed
      */
     public function search($terms);

@@ -16,12 +16,16 @@ use Doctrine\ORM\Query\Parser;
 /**
  * "MATCH_AGAINST" "(" {StateFieldPathExpression ","}* InParameter {Literal}? ")"
  */
-class MatchAgainst extends FunctionNode {
+class MatchAgainst extends FunctionNode
+{
 
     public $columns = array();
     public $needle;
     public $mode;
 
+    /**
+     * @param Parser $parser
+     */
     public function parse(Parser $parser)
     {
         $parser->match(Lexer::T_IDENTIFIER);
@@ -30,8 +34,7 @@ class MatchAgainst extends FunctionNode {
         do {
             $this->columns[] = $parser->StateFieldPathExpression();
             $parser->match(Lexer::T_COMMA);
-        }
-        while ($parser->getLexer()->isNextToken(Lexer::T_IDENTIFIER));
+        } while ($parser->getLexer()->isNextToken(Lexer::T_IDENTIFIER));
 
         $this->needle = $parser->InParameter();
 
@@ -42,6 +45,11 @@ class MatchAgainst extends FunctionNode {
         $parser->match(Lexer::T_CLOSE_PARENTHESIS);
     }
 
+    /**
+     * @param SqlWalker $sqlWalker
+     *
+     * @return string
+     */
     public function getSql(SqlWalker $sqlWalker)
     {
         $haystack = null;
@@ -55,7 +63,7 @@ class MatchAgainst extends FunctionNode {
         $query = "MATCH(" . $haystack .
             ") AGAINST (" . $this->needle->dispatch($sqlWalker);
 
-        if($this->mode && $this->mode->value != "") {
+        if ($this->mode && $this->mode->value != "") {
             $query .= " " . trim($this->mode->dispatch($sqlWalker), "'") . ")";
         } else {
             $query .= ")";
