@@ -91,7 +91,7 @@ $this->get('it_search.database.indexer')->updateIndex($object);
 
 There is no method for removing a specific index from the database for now. The feature will be implemented soon.
 
-# Automatic indexing
+### Automatic indexing
 
 New feature since 1.3.0 is an EventListener that automatically create, update and remove indexes when you create, update or remove entities that at mapped by the indexer.
 As the listener is disabled by default, use this config to enable it :
