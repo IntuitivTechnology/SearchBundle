@@ -136,7 +136,6 @@ class DatabaseIndexer
         $evtPreIndexObject = new SearchPreIndexObjectEvent($object, $this->em);
         $this->dispatcher->dispatch(ITSearchEvents::PRE_INDEX_OBJECT, $evtPreIndexObject);
 
-
         /** @var array $index */
         foreach ($this->indexConfig as $index) {
             $classname = $index['classname'];
@@ -153,7 +152,6 @@ class DatabaseIndexer
             if ($repository) {
 
                 $content = '';
-
 
                 // Build index content
                 foreach ($fields as $fieldname) {
@@ -196,11 +194,10 @@ class DatabaseIndexer
                     ->setContent(strip_tags(strtolower($content)));
 
                 $this->em->persist($searchIndex);
-
+                $this->em->flush($searchIndex);
             }
         }
 
-        $this->em->flush();
     }
 
     /**
@@ -268,13 +265,11 @@ class DatabaseIndexer
 
         try {
             $connection->query('SET FOREIGN_KEY_CHECKS=0');
-            $connection->query('DELETE FROM ' . $tableName);
-            // Beware of ALTER TABLE here--it's another DDL statement and will cause
-            // an implicit commit.
+            $connection->query('TRUNCATE TABLE ' . $tableName);
             $connection->query('SET FOREIGN_KEY_CHECKS=1');
             $connection->commit();
         } catch (\Exception $e) {
-            $connection->rollback();
+            $connection->rollBack();
             throw new $e;
         }
     }

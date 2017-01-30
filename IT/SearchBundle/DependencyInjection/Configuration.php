@@ -26,6 +26,9 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
+                ->booleanNode('enable_event_listener')
+                    ->defaultFalse()
+                ->end()
                 ->arrayNode('indexes')
                     ->isRequired()
                     ->prototype('array')

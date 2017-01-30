@@ -11,3 +11,12 @@ services:
     arguments:
       - "@doctrine.orm.entity_manager"
       - "@knp_paginator"
+
+  it_search.event_subscriber:
+    class: IT\SearchBundle\EventListener\SearchEventSubscriber
+    arguments:
+      - "%search.index.enable_event_listener%"
+      - "%search.index.configuration%"
+      - "@service_container"
+    tags:
+      - { name: "doctrine.event_subscriber" }

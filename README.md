@@ -75,6 +75,8 @@ $results = $databaseSearcher->search($terms);
 
 ## How to index content
 
+### Manual indexing
+
 The bundle provides one service with two methods to index content.
 
 The following method clears the index table and reindex all contents :
@@ -89,6 +91,19 @@ $this->get('it_search.database.indexer')->updateIndex($object);
 
 There is no method for removing a specific index from the database for now. The feature will be implemented soon.
 
+# Automatic indexing
+
+New feature since 1.3.0 is an EventListener that automatically create, update and remove indexes when you create, update or remove entities that at mapped by the indexer.
+As the listener is disabled by default, use this config to enable it :
+```yaml
+# app/config/config.yml
+
+it_search:
+  enable_event_listener: true
+  # ...
+```
+
+_Note : The listener is disabled by default to stay compatible with older versions of the bundle_
 
 ## Events
 
@@ -165,5 +180,5 @@ services:
   acme.search.subscriber:
     class: "ACMEBundle\EventSubscriber\SearchEventSubscriber"
     tags:
-      - { name:"kernel.event_subscriber" }
+      - { name: "kernel.event_subscriber" }
 ```
