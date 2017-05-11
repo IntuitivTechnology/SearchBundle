@@ -34,6 +34,8 @@ imports:
 
 it_search:
   indexes:
+    enable_event_listener: ~ # Default to false, enables an Event listener that automatically update/create a mapped entity index
+    min_score: ~ # Default to 0.8. Minimum score for the MATCH_AGAINST mysql function
     projects:
       classname: 'ACMEBundle\Entity\EntityFQCN'
       identifier: id #identifier fieldName
