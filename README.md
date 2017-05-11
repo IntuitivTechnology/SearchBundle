@@ -36,6 +36,7 @@ it_search:
   indexes:
     enable_event_listener: ~ # Default to false, enables an Event listener that automatically update/create a mapped entity index
     min_score: ~ # Default to 0.8. Minimum score for the MATCH_AGAINST mysql function
+    use_result_cache: ~ # Default to false. Enables the Doctrine result cache for 3600s
     projects:
       classname: 'ACMEBundle\Entity\EntityFQCN'
       identifier: id #identifier fieldName
@@ -71,7 +72,7 @@ In your controller, use the following lines to get the results in your search pa
 The **search()** function returns a SlidingPagination object (from Knp/Paginator).
 ```
 $databaseSearcher = $this->get('it_search.database.searcher');
-$results = $databaseSearcher->search($terms, $page = 1, $limit = 10, array $entityClassnames = array());
+$results = $databaseSearcher->search($terms, $page = 1, $limit = 10, array $entityClassnames = array(), $enableLikeSearch  = false);
 ```
  _Note : When you call the "search" method, il you don't provide a list of classnames as 4th parameter, the service will search in all entities indexed._
 

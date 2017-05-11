@@ -11,6 +11,7 @@ namespace IT\SearchBundle\EventListener;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
+use IT\SearchBundle\Entity\SearchIndex;
 use IT\SearchBundle\Services\DatabaseIndexer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -26,6 +27,9 @@ class SearchEventSubscriber implements EventSubscriber
     /** @var DatabaseIndexer $indexer */
     protected $container;
 
+    /** @var bool $useResultCache */
+    protected $useResultCache;
+
     /**
      * SearchEventSubscriber constructor.
      *
@@ -33,11 +37,13 @@ class SearchEventSubscriber implements EventSubscriber
      * @param array              $indexConfig
      * @param ContainerInterface $container
      */
-    public function __construct($enableEventListener, array $indexConfig, ContainerInterface $container)
+    public function __construct($enableEventListener, array $indexConfig, ContainerInterface $container, $useResultCache)
     {
         $this->enableEventListener = $enableEventListener;
         $this->indexConfig = $indexConfig;
         $this->container = $container;
+        $this->useResultCache = $useResultCache;
+
     }
 
     /**
@@ -63,7 +69,7 @@ class SearchEventSubscriber implements EventSubscriber
             return;
         }
 
-        $this->updateIndexIfNeeded($args->getEntity());
+        $this->updateIndexIfNeeded($args);
     }
 
     /**
@@ -76,7 +82,7 @@ class SearchEventSubscriber implements EventSubscriber
             return;
         }
 
-        $this->updateIndexIfNeeded($args->getEntity());
+        $this->updateIndexIfNeeded($args);
     }
 
     /**
@@ -95,6 +101,12 @@ class SearchEventSubscriber implements EventSubscriber
         foreach ($this->indexConfig as $config) {
             if ($config['classname'] == get_class($args->getEntity())) {
                 $this->getIndexer()->removeIndex($args->getEntity());
+
+                if ($this->useResultCache === true) {
+                    $cacheDriver = $args->getEntityManager()->getConfiguration()->getResultCacheImpl();
+                    $cacheDriver->delete(SearchIndex::CACHE_INDEX);
+                }
+
                 return;
             }
         }
@@ -107,12 +119,20 @@ class SearchEventSubscriber implements EventSubscriber
      *
      * @throws \Exception
      */
-    protected function updateIndexIfNeeded($entity)
+    protected function updateIndexIfNeeded(LifecycleEventArgs $args)
     {
+
+        $entity = $args->getEntity();
 
         foreach ($this->indexConfig as $config) {
             if ($config['classname'] == get_class($entity)) {
                 $this->getIndexer()->updateIndex($entity);
+
+                if ($this->useResultCache === true) {
+                    $cacheDriver = $args->getEntityManager()->getConfiguration()->getResultCacheImpl();
+                    $cacheDriver->delete(SearchIndex::CACHE_INDEX);
+                }
+
                 return;
             }
         }

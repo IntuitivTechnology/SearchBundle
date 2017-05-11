@@ -26,17 +26,21 @@ class DatabaseSearcher implements SearcherInterface
     /** @var string $minScore */
     protected $minScore;
 
+    /** @var bool $useResultCache */
+    protected $useResultCache;
+
     /**
      * DatabaseSearcher constructor.
      *
      * @param EntityManager      $em
      * @param PaginatorInterface $paginator
      */
-    public function __construct(EntityManager $em, PaginatorInterface $paginator, $minScore)
+    public function __construct(EntityManager $em, PaginatorInterface $paginator, $minScore, $useResultCache)
     {
         $this->em = $em;
         $this->paginator = $paginator;
         $this->minScore = $minScore;
+        $this->useResultCache = $useResultCache;
     }
 
     /**
@@ -57,14 +61,14 @@ class DatabaseSearcher implements SearcherInterface
 
         /** @var SlidingPagination $indexes */
         $indexes = $this->paginator->paginate(
-            $this->em->getRepository('ITSearchBundle:SearchIndex')->searchQB($terms, $entityClassnames, $this->minScore),
+            $this->em->getRepository('ITSearchBundle:SearchIndex')->searchQB($terms, $entityClassnames, $this->minScore, $this->useResultCache),
             $page,
             $limit
         );
 
         if ($indexes->getTotalItemCount() <= 0) {
             $indexes = $this->paginator->paginate(
-                $this->em->getRepository('ITSearchBundle:SearchIndex')->searchExpandedQB($terms, $entityClassnames, $this->minScore),
+                $this->em->getRepository('ITSearchBundle:SearchIndex')->searchExpandedQB($terms, $entityClassnames, $this->minScore, $this->useResultCache),
                 $page,
                 $limit
             );
@@ -72,7 +76,7 @@ class DatabaseSearcher implements SearcherInterface
 
         if ($indexes->getTotalItemCount() <= 0 && $enableLikeSearch) {
             $indexes = $this->paginator->paginate(
-                $this->em->getRepository('ITSearchBundle:SearchIndex')->searchLikeQB($terms, $entityClassnames),
+                $this->em->getRepository('ITSearchBundle:SearchIndex')->searchLikeQB($terms, $entityClassnames, $this->useResultCache),
                 $page,
                 $limit
             );

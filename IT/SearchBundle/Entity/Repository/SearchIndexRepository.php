@@ -3,6 +3,7 @@
 namespace IT\SearchBundle\Entity\Repository;
 
 use Doctrine\ORM\QueryBuilder;
+use IT\SearchBundle\Entity\SearchIndex;
 
 /**
  * SearchIndexRepository
@@ -21,7 +22,7 @@ class SearchIndexRepository extends \Doctrine\ORM\EntityRepository
      *
      * @return QueryBuilder
      */
-    public function searchQB($terms, array $entityClassnames = array(), $minScore = '0.8')
+    public function searchQB($terms, array $entityClassnames = array(), $minScore = '0.8', $useResultCache = false)
     {
 
         $terms = strip_tags(strtolower($terms));
@@ -34,7 +35,11 @@ class SearchIndexRepository extends \Doctrine\ORM\EntityRepository
 
         $this->addEntityClassnamesFilter($qb, $entityClassnames);
 
-        return $qb;
+        if ($useResultCache) {
+            return $qb->getQuery()->useResultCache(true, 3600, SearchIndex::CACHE_INDEX);
+        } else {
+            return $qb;
+        }
     }
 
     /**
@@ -45,7 +50,7 @@ class SearchIndexRepository extends \Doctrine\ORM\EntityRepository
      *
      * @return QueryBuilder
      */
-    public function searchExpandedQB($terms, array $entityClassnames = array(), $minScore = '0.8')
+    public function searchExpandedQB($terms, array $entityClassnames = array(), $minScore = '0.8', $useResultCache = false)
     {
 
         $terms = strip_tags(strtolower($terms));
@@ -58,7 +63,11 @@ class SearchIndexRepository extends \Doctrine\ORM\EntityRepository
 
         $this->addEntityClassnamesFilter($qb, $entityClassnames);
 
-        return $qb;
+        if ($useResultCache) {
+            return $qb->getQuery()->useResultCache(true, 3600, SearchIndex::CACHE_INDEX);
+        } else {
+            return $qb;
+        }
     }
 
     /**
@@ -69,7 +78,7 @@ class SearchIndexRepository extends \Doctrine\ORM\EntityRepository
      *
      * @return QueryBuilder
      */
-    public function searchLikeQB($terms, array $entityClassnames = array())
+    public function searchLikeQB($terms, array $entityClassnames = array(), $useResultCache = false)
     {
 
         $terms = strip_tags(strtolower($terms));
@@ -82,7 +91,11 @@ class SearchIndexRepository extends \Doctrine\ORM\EntityRepository
 
         $this->addEntityClassnamesFilter($qb, $entityClassnames);
 
-        return $qb;
+        if ($useResultCache) {
+            return $qb->getQuery()->useResultCache(true, 3600, SearchIndex::CACHE_INDEX);
+        } else {
+            return $qb;
+        }
     }
 
     /**

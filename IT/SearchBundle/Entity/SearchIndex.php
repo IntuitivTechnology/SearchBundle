@@ -14,6 +14,8 @@ use Knp\DoctrineBehaviors\Model as ORMBehaviors;
 class SearchIndex
 {
 
+    const CACHE_INDEX = 'search_index';
+
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
