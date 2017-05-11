@@ -23,16 +23,20 @@ class DatabaseSearcher implements SearcherInterface
     /** @var PaginatorInterface $paginator */
     protected $paginator;
 
+    /** @var string $minScore */
+    protected $minScore;
+
     /**
      * DatabaseSearcher constructor.
      *
      * @param EntityManager      $em
      * @param PaginatorInterface $paginator
      */
-    public function __construct(EntityManager $em, PaginatorInterface $paginator)
+    public function __construct(EntityManager $em, PaginatorInterface $paginator, $minScore)
     {
         $this->em = $em;
         $this->paginator = $paginator;
+        $this->minScore = $minScore;
     }
 
     /**
@@ -47,22 +51,33 @@ class DatabaseSearcher implements SearcherInterface
      *
      * @return SlidingPagination
      */
-    public function search($terms, $page = 1, $limit = 10, array $entityClassnames = array())
+    public function search($terms, $page = 1, $limit = 10, array $entityClassnames = array(), $enableLikeSearch  = false)
     {
+
+
         /** @var SlidingPagination $indexes */
         $indexes = $this->paginator->paginate(
-            $this->em->getRepository('ITSearchBundle:SearchIndex')->searchQB($terms, $entityClassnames),
+            $this->em->getRepository('ITSearchBundle:SearchIndex')->searchQB($terms, $entityClassnames, $this->minScore),
             $page,
             $limit
         );
 
         if ($indexes->getTotalItemCount() <= 0) {
             $indexes = $this->paginator->paginate(
-                $this->em->getRepository('ITSearchBundle:SearchIndex')->searchExpandedQB($terms, $entityClassnames),
+                $this->em->getRepository('ITSearchBundle:SearchIndex')->searchExpandedQB($terms, $entityClassnames, $this->minScore),
                 $page,
                 $limit
             );
         }
+
+        if ($indexes->getTotalItemCount() <= 0 && $enableLikeSearch) {
+            $indexes = $this->paginator->paginate(
+                $this->em->getRepository('ITSearchBundle:SearchIndex')->searchLikeQB($terms, $entityClassnames),
+                $page,
+                $limit
+            );
+        }
+
 
         $results = array();
 
@@ -75,7 +90,9 @@ class DatabaseSearcher implements SearcherInterface
         foreach ($indexes as $index) {
 
             // $index[0] is the object SearchIndex
-            $index = $index[0];
+            if (is_array($index)) {
+                $index = $index[0];
+            }
 
             if (!array_key_exists($index->getClassname(), $identifiers)) {
                 $identifiers[$index->getClassname()] = array(
@@ -104,7 +121,9 @@ class DatabaseSearcher implements SearcherInterface
 
         // Build a result array
         foreach ($indexes as $index) {
-            $index = $index[0];
+            if (is_array($index)) {
+                $index = $index[0];
+            }
 
             if (array_key_exists($index->getClassname(), $objects) && array_key_exists($index->getIdentifier(), $objects[$index->getClassname()])) {
                 $results[] = $objects[$index->getClassname()][$index->getIdentifier()];

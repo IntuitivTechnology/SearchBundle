@@ -28,5 +28,6 @@ class ITSearchExtension extends Extension
 
         $container->setParameter('search.index.configuration', $config['indexes']);
         $container->setParameter('search.index.enable_event_listener', $config['enable_event_listener']);
+        $container->setParameter('search.index.min_score', $config['min_score']);
     }
 }

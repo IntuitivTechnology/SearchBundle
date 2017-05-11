@@ -21,14 +21,14 @@ class SearchIndexRepository extends \Doctrine\ORM\EntityRepository
      *
      * @return QueryBuilder
      */
-    public function searchQB($terms, array $entityClassnames = array())
+    public function searchQB($terms, array $entityClassnames = array(), $minScore = '0.8')
     {
 
         $terms = strip_tags(strtolower($terms));
 
         $qb = $this->createQueryBuilder('si')
             ->select('si, MATCH_AGAINST(si.content, :textFilter \'IN NATURAL LANGUAGE MODE\') as score')
-            ->where("MATCH_AGAINST(si.content, :textFilter 'IN NATURAL LANGUAGE MODE') >= 0.8")
+            ->where("MATCH_AGAINST(si.content, :textFilter 'IN NATURAL LANGUAGE MODE') >= " . $minScore)
             ->setParameter('textFilter', $terms)
             ->addOrderBy('score', 'DESC');
 
@@ -45,16 +45,40 @@ class SearchIndexRepository extends \Doctrine\ORM\EntityRepository
      *
      * @return QueryBuilder
      */
-    public function searchExpandedQB($terms, array $entityClassnames = array())
+    public function searchExpandedQB($terms, array $entityClassnames = array(), $minScore = '0.8')
     {
 
         $terms = strip_tags(strtolower($terms));
 
         $qb = $this->createQueryBuilder('si')
             ->select('si, MATCH_AGAINST(si.content, :textFilter \'IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION\') as score')
-            ->where("MATCH_AGAINST(si.content, :textFilter 'IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION') >= 0.8")
+            ->where("MATCH_AGAINST(si.content, :textFilter 'IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION') >= " . $minScore)
             ->setParameter('textFilter', $terms)
             ->addOrderBy('score', 'DESC');
+
+        $this->addEntityClassnamesFilter($qb, $entityClassnames);
+
+        return $qb;
+    }
+
+    /**
+     * Returns a QueryBuilder corresponding to the simple LIKE search
+     *
+     * @param       $terms
+     * @param array $entityClassnames
+     *
+     * @return QueryBuilder
+     */
+    public function searchLikeQB($terms, array $entityClassnames = array())
+    {
+
+        $terms = strip_tags(strtolower($terms));
+
+        $qb = $this->createQueryBuilder('si')
+            ->select('si')
+            ->where("si.content like :textFilter")
+            ->setParameter('textFilter', '%' . $terms . '%')
+        ;
 
         $this->addEntityClassnamesFilter($qb, $entityClassnames);
 

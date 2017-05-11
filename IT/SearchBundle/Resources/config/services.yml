@@ -11,6 +11,7 @@ services:
     arguments:
       - "@doctrine.orm.entity_manager"
       - "@knp_paginator"
+      - "%search.index.min_score%"
 
   it_search.event_subscriber:
     class: IT\SearchBundle\EventListener\SearchEventSubscriber
