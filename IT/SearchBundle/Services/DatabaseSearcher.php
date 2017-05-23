@@ -58,25 +58,26 @@ class DatabaseSearcher implements SearcherInterface
     public function search($terms, $page = 1, $limit = 10, array $entityClassnames = array(), $enableLikeSearch  = false)
     {
 
-
         /** @var SlidingPagination $indexes */
-        $indexes = $this->paginator->paginate(
-            $this->em->getRepository('ITSearchBundle:SearchIndex')->searchQB($terms, $entityClassnames, $this->minScore, $this->useResultCache),
-            $page,
-            $limit
-        );
-
-        if ($indexes->getTotalItemCount() <= 0) {
+        if ($enableLikeSearch) {
             $indexes = $this->paginator->paginate(
-                $this->em->getRepository('ITSearchBundle:SearchIndex')->searchExpandedQB($terms, $entityClassnames, $this->minScore, $this->useResultCache),
+                $this->em->getRepository('ITSearchBundle:SearchIndex')->searchLikeQB($terms, $entityClassnames, $this->useResultCache),
                 $page,
                 $limit
             );
         }
 
-        if ($indexes->getTotalItemCount() <= 0 && $enableLikeSearch) {
+        if (!isset($indexes) || !($indexes instanceof SlidingPagination) || $indexes->getTotalItemCount() <= 0) {
             $indexes = $this->paginator->paginate(
-                $this->em->getRepository('ITSearchBundle:SearchIndex')->searchLikeQB($terms, $entityClassnames, $this->useResultCache),
+                $this->em->getRepository('ITSearchBundle:SearchIndex')->searchQB($terms, $entityClassnames, $this->minScore, $this->useResultCache),
+                $page,
+                $limit
+            );
+        }
+
+        if ($indexes->getTotalItemCount() <= 0) {
+            $indexes = $this->paginator->paginate(
+                $this->em->getRepository('ITSearchBundle:SearchIndex')->searchExpandedQB($terms, $entityClassnames, $this->minScore, $this->useResultCache),
                 $page,
                 $limit
             );
