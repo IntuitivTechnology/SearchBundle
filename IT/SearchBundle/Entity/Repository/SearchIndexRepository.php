@@ -85,7 +85,7 @@ class SearchIndexRepository extends \Doctrine\ORM\EntityRepository
 
         $qb = $this->createQueryBuilder('si')
             ->select('si')
-            ->where("si.content like :textFilter")
+            ->where("LOWER(si.content) like :textFilter")
             ->setParameter('textFilter', '%' . $terms . '%')
         ;
 
