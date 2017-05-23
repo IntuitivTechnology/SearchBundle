@@ -20,5 +20,6 @@ services:
       - "%search.index.enable_event_listener%"
       - "%search.index.configuration%"
       - "@service_container"
+      - "%search.index.use_result_cache%"
     tags:
       - { name: "doctrine.event_subscriber" }
